@@ -51,7 +51,7 @@
 
     this.websites = [
         {
-            regex: /SeenBooklet/i,
+            regex: /localhost/i,
             name: 'testPage'
         }
     ]
