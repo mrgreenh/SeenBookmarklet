@@ -2,6 +2,23 @@
     this.seenEndpoint = "http://api.seen.co/v0.1/create/",
     this.apiKey = '8967858593';
 
+    this.includeDependencies = function(){
+	if(window.jQuery===undefined){
+	    console.log('Including jQUery');
+	    var script = document.createElement('script');
+	    script.setAttribute('src',"http://code.jquery.com/jquery-2.1.0.min.js");
+	    script.setAttribute('type','text/javascript');
+	    document.querySelector('head').appendChild(script);
+	    return false;
+	}
+	return true;
+    }
+
+    if(!this.includeDependencies()){
+	alert('Jquery was not included, but we just added it to the page. Run the Seen Scraper again.');
+	return;
+    }
+
     this.model = {
         title: '',
         hashtags: [],
@@ -57,17 +74,11 @@
             endpointWithHashtags += this.model.hashtags[i];
             if(!(i==this.model.hashtags.length-1)) endpointWithHashtags+='%20';
         }
-        var postData = new FormData();
-        postData.append('api_key',this.apiKey);
-        for(k in this.model){
-            if(!(k=='hashtags')){
-                postData.append(k,this.model[k]);
-            }
-        }
-        var request = new XMLHttpRequest();
-        request.open("POST",this.seenEndpoint,false);
-        request.send(postData);
-        console.log(request.responseText);
+	this.model.api_key = this.apiKey;
+	delete this.model.hashtags;
+	$.post(endpointWithHashtags, this.model).done(function(data){
+	    console.log(data);
+	});
     }
 
     this.scrapePage = function(){
