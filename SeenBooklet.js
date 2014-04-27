@@ -1,7 +1,47 @@
 (function(){
+    //Settings and expansions
     this.seenEndpoint = "http://yair-api.mahaya.co/v0.1/create/";
     this.baseUrl = "http://stage.mahaya.co/",
     this.apiKey = '1234';
+
+    this.scrapers = {
+        'testPage': {
+            title: function(){
+                return document.querySelector('h1').innerHTML;
+            },
+            start_time: function(){
+                var d = new Date(parseInt(document.querySelector('.startTime').innerHTML));
+		return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()+"T"+d.getHours()+":"+d.getMinutes()+":"+d.getSeconds();
+            },
+            end_time: function(){
+                var d = new Date(parseInt(document.querySelector('.endTime').innerHTML));
+		return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()+"T"+d.getHours()+":"+d.getMinutes()+":"+d.getSeconds();
+            },
+            location: function(){
+                return 'New York, NY';
+            },
+	    tz: function(){
+		return $("#seenBookmarkletContainer #timezoneSelector").val();
+	    },
+            hashtags: function(){
+		var input = $("#seenBookmarkletContainer #hashtagsField").val();
+                var hashtags = input.split(' ');
+                return hashtags;
+            }
+        }
+    }
+
+    this.interfaceFields = {
+	'testPage': ["tz", "hashtags"],
+    }
+
+    this.websites = [
+        {
+            regex: /localhost/i,
+            name: 'testPage'
+        }
+    ]
+
 
     //Checking for jquery
     this.includeDependencies = function(){
@@ -33,46 +73,9 @@
         hashtags: [],
         start_time: null,
         end_time: null,
+	tz: "-5.0",
 	location:'',
     }
-
-    this.scrapers = {
-        'testPage': {
-            title: function(){
-                return document.querySelector('h1').innerHTML;
-            },
-            start_time: function(){
-                var d = new Date(parseInt(document.querySelector('.startTime').innerHTML));
-		return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()+"T"+d.getHours()+":"+d.getMinutes()+":"+d.getSeconds();
-            },
-            end_time: function(){
-                var d = new Date(parseInt(document.querySelector('.endTime').innerHTML));
-		return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()+"T"+d.getHours()+":"+d.getMinutes()+":"+d.getSeconds();
-            },
-            location: function(){
-                return 'New York, NY';
-            },
-	    timezone: function(){
-		return $("#seenBookmarkletContainer #timezoneSelector").val();
-	    },
-            hashtags: function(){
-		var input = $("#seenBookmarkletContainer #hashtagsField").val();
-                var hashtags = input.split(' ');
-                return hashtags;
-            }
-        }
-    }
-
-    this.interfaceFields = {
-	'testPage': ["timezone", "hashtags"],
-    }
-
-    this.websites = [
-        {
-            regex: /localhost/i,
-            name: 'testPage'
-        }
-    ]
 
     this.detectWebsite = function(){
         var currentAddress = window.location;
@@ -155,7 +158,7 @@
 
     //--------------------Fields rendering
     
-    this.timezoneField = function(){
+    this.tzField = function(){
 	var $select = $("<select name='timezoneSelector' id='timezoneSelector'></select>");
 	for(option in this.timezoneOptions){
 	    var $option = $("<option value='"+option+"'>"+this.timezoneOptions[option]+"</option>");
