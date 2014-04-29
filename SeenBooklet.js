@@ -28,18 +28,56 @@
                 var hashtags = input.split(' ');
                 return hashtags;
             }
+        },
+        'meetup': {
+            title: function(){
+                return $("#event-title h1").text();
+            },
+            start_time: function(){
+		var date = this.meetupDate();
+		var timeString = $("time#event-start-time .subtext").text().split(" ");
+		var dayPeriod = timeString[1];
+		var hour = dayPeriod == "AM" ? timeString[0].split(":")[0] : (parseInt(timeString[0].split(":")[0])+12);
+		var minute = timeString[0].split(":")[1];
+		return date+"T"+hour+":"+minute+":00";
+            },
+            end_time: function(){
+		var date = this.meetupDate();
+		var timeString = $("time#event-end-time .subtext").text().split(" ");
+		var dayPeriod = timeString[1];
+		var hour = dayPeriod == "AM" ? timeString[0].split(":")[0] : (parseInt(timeString[0].split(":")[0])+12);
+		var minute = timeString[0].split(":")[1];
+		return date+"T"+hour+":"+minute+":00";
+            },
+            location: function(){
+                return $("#C_metabox .locality").text()+", "+$("#C_metabox .region").text();
+            },
+	    tz: function(){
+		return $("#seenBookmarkletContainer #timezoneSelector").val();
+	    },
+            hashtags: function(){
+		var input = $("#seenBookmarkletContainer #hashtagsField").val();
+                var hashtags = input.split(' ');
+                return hashtags;
+            }
         }
     }
 
     this.interfaceFields = {
 	'testPage': ["tz", "hashtags"],
+	'meetup': ["tz", "hashtags"],
     }
 
     this.websites = [
         {
             regex: /localhost/i,
             name: 'testPage'
+        },
+        {
+            regex: /meetup/i,
+            name: 'meetup'
         }
+
     ]
 
 
@@ -112,7 +150,7 @@
         var website = this.detectWebsite();
 	if(!website) return;
         for(key in this.model){
-            this.model[key] = this.scrapers[website][key]();
+            this.model[key] = $.proxy(this.scrapers[website][key], this);
         }
         this.sendData();
     }
@@ -217,4 +255,16 @@
 
     this.init();
     console.log(this.model);
+
+    //Scraper-specific methods
+    this.meetupDate = function(){
+        var dateString = $("time#event-start-time h3").text();
+	dateString = dateString.split(",");
+	var dayString = dateString[1].trim().split(" ");
+	var yearString = dateString[2].trim();
+	var day = dayString[1].trim();
+	var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+	var month = months.indexOf(dayString[0].trim());
+	return yearString+"-"+(month+1)+"-"+day;
+    }
 })();
